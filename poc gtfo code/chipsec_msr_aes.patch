@@ -1,0 +1,88 @@
+diff -rNup chipsec-master/source/tool/chipsec/cfg/hsw.xml chipsec-master.new/source/tool/chipsec/cfg/hsw.xml
+--- chipsec-master/source/tool/chipsec/cfg/hsw.xml	2015-01-23 16:07:19.000000000 -0800
++++ chipsec-master.new/source/tool/chipsec/cfg/hsw.xml	2015-03-09 19:13:55.949498250 -0700
+@@ -39,6 +39,10 @@
+   <!--                                      -->
+   <!-- #################################### -->
+   <registers>
++   <register name="IA32_AES_NI"   type="msr" msr="0x13c" desc="AES-NI Lock">
++      <field name="Lock"     bit="0"  size="1"  desc="AES-NI Lock Bit" />
++      <field name="AESDisable" bit="1" size="1" desc="AES-NI Disable Bit (set to disable)" />
++   </register>
+   </registers>
+ 
+-</configuration>
+\ No newline at end of file
++</configuration>
+diff -rNup chipsec-master/source/tool/chipsec/modules/hsw/aes_ni.py chipsec-master.new/source/tool/chipsec/modules/hsw/aes_ni.py
+--- chipsec-master/source/tool/chipsec/modules/hsw/aes_ni.py	1969-12-31 16:00:00.000000000 -0800
++++ chipsec-master.new/source/tool/chipsec/modules/hsw/aes_ni.py	2015-03-09 19:22:12.693518998 -0700
+@@ -0,0 +1,68 @@
++#CHIPSEC: Platform Security Assessment Framework
++#Copyright (c) 2010-2015, Intel Corporation
++# 
++#This program is free software; you can redistribute it and/or
++#modify it under the terms of the GNU General Public License
++#as published by the Free Software Foundation; Version 2.
++#
++#This program is distributed in the hope that it will be useful,
++#but WITHOUT ANY WARRANTY; without even the implied warranty of
++#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#GNU General Public License for more details.
++#
++#You should have received a copy of the GNU General Public License
++#along with this program; if not, write to the Free Software
++#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
++#
++#Contact information:
++#chipsec@intel.com
++#
++
++
++
++
++## \addtogroup modules
++# __chipsec/modules/hsw/aes_ni.py__ - checks for AES-NI lock
++#
++
++
++from chipsec.module_common import *
++from chipsec.hal.msr import *
++
++TAGS = [MTAG_BIOS,MTAG_HWCONFIG]
++
++class aes_ni(BaseModule):
++
++    def __init__(self):
++        BaseModule.__init__(self)
++
++    def is_supported(self):
++        return True
++
++    def check_aes_ni_supported(self):
++	return True
++
++    def check_aes_ni(self):
++        self.logger.start_test( "Checking if AES-NI lock bit is set" )
++
++        aes_msr = chipsec.chipset.read_register( self.cs, 'IA32_AES_NI' )
++        chipsec.chipset.print_register( self.cs, 'IA32_AES_NI', aes_msr )
++
++	aes_msr_lock =  aes_msr  & 0x1
++
++	# We don't really care if it is enabled or not since the software needs to 
++	# test - the only security issue is if it is not locked
++	aes_msr_disable = aes_msr & 0x2
++
++	# Check if the lock is not set, then ERROR
++	if (not aes_msr_lock): 
++		return False
++
++        return True
++
++    # --------------------------------------------------------------------------
++    # run( module_argv )
++    # Required function: run here all tests from this module
++    # --------------------------------------------------------------------------
++    def run( self, module_argv ):
++        return self.check_aes_ni()
