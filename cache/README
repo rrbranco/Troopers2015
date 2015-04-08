@@ -1,0 +1,45 @@
+***********
+* WARNING *
+***********
+
+Most of the tests will crash your machine. So, do not execute these
+tests on production machines because, more than the crash, you may
+experience other effects such as loose some files due to filesystem
+crash.
+
+
+/*
+ * Developed by Gabriel Negreira Barbosa (pirata) and Rodrigo Rubira Branco (BSDaemon)
+ *
+ * License:  Beerware
+ */
+
+
+Before running any kernel module, make sure there is only 1 thread
+in execution. disable_threads.sh is a script that achieves that for
+a system with 8 threads. If your system has a different number of
+threads, please, change this script.
+
+
+
+async_cache_memory:
+	- Proves CR3 does not use cache when PAE is being used
+	- Creates an async between cache and memory on the PDPTEs
+	- Invalidates the cache in a way that the PDPTEs changed
+	  in the cache are not written back to memory
+
+	- make clean ; make ; insmod cache.ko ; rmmod cache
+
+
+
+no_fill_mode:
+	- Shows behavior of no-fill mode
+	- In the code (lib.S), there are comments to test two
+	  behaviors of no-fill mode: invd that does not invalidates
+	  the cache and the write-back that happens when leaving the
+	  no-fill mode.
+	- This code can be modified in many other ways to test other
+	  characteristics of no-fill mode.
+
+	- make clean ; make ; insmod cache.ko
+		- This code crashes - this is exactly the idea of it :)

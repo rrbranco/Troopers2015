@@ -1,0 +1,17 @@
+***********
+* WARNING *
+***********
+
+This is a proof-of-concept code. Do not run it in production machines!
+
+
+/*
+ * Developed by Gabriel Negreira Barbosa (pirata) and Rodrigo Rubira Branco (BSDaemon)
+ *
+ * License:  Beerware
+ */
+ 
+
+This module dumps both, PAE structure of a given virtual address and MTRR information of the system.
+
+make clean ; make ; insmod util.ko ; rmmod util
